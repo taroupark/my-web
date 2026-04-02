@@ -102,17 +102,19 @@
     }
 
     // 検索＆自動ジャンプ機能！！
-    function runSearch() {
+  // 【真・検索機能】タブから一歩も出さない完結型！！
+function runSearch() {
     const q = document.getElementById('query').value;
     if (!q) return;
 
     const player = document.getElementById('main-player');
     
-    // 検索ワードをURL専用の文字に変換（encodeURIComponent）して、埋め込み検索を発動！！
-    player.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&autoplay=1`;
+    // 検索ワードをURL専用に変換（encodeURIComponent）し、
+    // 埋め込み専用の検索（listType=search）を、あなたの枠（player）に直接ブチ込む！！
+    player.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&autoplay=1&rel=0&modestbranding=1`;
     
-    // 1ミリの迷いもなく「再生中タブ」へジャンプ！！
-    switchTab('p');
+    // 【重要】タブ移動（switchTab）はあえて書かない！！
+    // これで画面はそのまま、下の「枠」の中身だけが爆速で検索結果に変わる！！
 }
 </script>
 
