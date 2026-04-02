@@ -1,14 +1,101 @@
 <!DOCTYPE html>
-<html>
-<body style="margin:0; background:#000; display:flex; justify-content:center; align-items:center; height:100vh;">
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>youtube clone ver1.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* レイアウト：黒基調*/
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* 1. 煽り全開のパスコード画面 */
+        #lock-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #lock-screen h2 { font-size: 24px; transition: 0.3s; }
+        input#pass { padding: 15px; background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 10px; text-align: center; font-size: 20px; }
 
-    <iframe width="800" height="450" 
-        src="https://www.youtube-nocookie.com/embed/TRTMwR9rdiw?autoplay=1&mute=1&rel=0" 
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        referrerpolicy="strict-origin-when-cross-origin" 
-        allowfullscreen>
-    </iframe>
+        /* 2. メインアプリ */
+        #app { display: none; flex: 1; flex-direction: column; }
+        
+        /* 再生中タブ用プレイヤー */
+        #player-container { flex: 1; background: #000; display: none; }
+        #player-container.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* 検索結果タブ用リスト */
+        #search-container { flex: 1; overflow-y: auto; display: none; padding: 10px; }
+        #search-container.active { display: block; }
+        .search-bar { display: flex; padding: 10px; background: #1a1a1a; position: sticky; top: 0; z-index: 10; }
+        #query { flex: 1; padding: 12px; background: #333; border: none; color: #fff; border-radius: 5px; }
+
+        /* 下部ナビゲーション */
+        .nav { height: 70px; background: #1a1a1a; border-top: 1px solid #333; display: flex; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #888; }
+        .nav-item.active { color: #f00; background: #222; }
+    </style>
+</head>
+<body>
+
+<div id="lock-screen">
+    <h2 id="msg">ACCESS CODE REQUIRED</h2>
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="unlock()" style="margin-top:20px; padding:10px 40px; background:#f00; color:#fff; border:none; border-radius:5px; cursor:pointer;">UNLOCK</button>
+</div>
+
+<div id="app">
+    <div id="search-container" class="active">
+        <div class="search-bar">
+            <input type="text" id="query" placeholder="YouTube検索（LiveもOK）">
+            <button onclick="runSearch()" style="background:#f00; border:none; color:#fff; padding:0 15px; border-radius:0 5px 5px 0;">🔍</button>
+        </div>
+        <div id="results" style="padding:20px; text-align:center; color:#555;">
+            <p>↑の検索窓で動画を探してね！</p>
+        </div>
+    </div>
+
+    <div id="player-container">
+        <iframe id="main-player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+
+    <div class="nav">
+        <div id="tab-s" class="nav-item active" onclick="switchTab('s')">🔍 検索</div>
+        <div id="tab-p" class="nav-item" onclick="switchTab('p')">📺 再生中</div>
+    </div>
+</div>
+
+<script>
+    // パスワード機能（0000以外は煽るｗ）
+    function unlock() {
+        const p = document.getElementById('pass').value;
+        const msg = document.getElementById('msg');
+        if (p === "0000") {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+        } else {
+            msg.innerText = "ドンマイｗ 帰れｗ";
+            msg.style.color = "red";
+            document.getElementById('pass').value = "";
+        }
+    }
+
+    // タブ切り替え機能
+    function switchTab(type) {
+        document.getElementById('search-container').classList.toggle('active', type === 's');
+        document.getElementById('player-container').classList.toggle('active', type === 'p');
+        document.getElementById('tab-s').classList.toggle('active', type === 's');
+        document.getElementById('tab-p').classList.toggle('active', type === 'p');
+    }
+
+    // 検索＆自動ジャンプ機能！！
+    function runSearch() {
+        const q = document.getElementById('query').value;
+        const player = document.getElementById('main-player');
+        // 検索結果をiframeにブチ込む（LiveもこれでOK）
+        player.src = `https://www.youtube.com/embed?listType=search&list=${q}&autoplay=1`;
+        
+        // 検索したら自動で「再生中タブ」に飛ばす！
+        switchTab('p');
+    }
+</script>
 
 </body>
 </html>
