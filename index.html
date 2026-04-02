@@ -37,9 +37,10 @@
 
         const player = document.getElementById('player');
         
-        // 🚀 YouTubeの検索結果をそのまま枠内に流し込む！！
-        // 埋め込み可能な検索結果を表示する、1ミリの狂いもない公式パラメータだ！！
-        player.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&origin=${window.location.origin}`;
+        // 🚀 【これが真の解決策だ！！】
+        // embed（埋め込み専用）ではなく、YouTubeの「検索結果（results）」ページを直接呼ぶ！！
+        // これで、あなたのThinkPadに候補がズラッと並びます！！ｗ
+        player.src = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
     }
 
     // 起動時に軽くフォーカスを合わせるｗ
