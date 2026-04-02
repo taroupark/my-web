@@ -63,6 +63,22 @@
 </div>
 
 <script>
+ // 画面が読み込まれたら全てのキー操作を「有効」にする
+    window.addEventListener('load', () => {
+        
+        // ① パスワードのエンター
+        const passInput = document.getElementById('pass');
+        if (passInput) {
+            passInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') unlock(); });
+        }
+
+        // ② 検索窓のエンター
+        const queryInput = document.getElementById('query');
+        if (queryInput) {
+            queryInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
+        }
+        
+    });
     // パスワード機能（0000以外は煽るｗ）
     function unlock() {
         const p = document.getElementById('pass').value;
