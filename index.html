@@ -103,14 +103,17 @@
 
     // 検索＆自動ジャンプ機能！！
     function runSearch() {
-        const q = document.getElementById('query').value;
-        const player = document.getElementById('main-player');
-        // 検索結果をiframeにブチ込む（LiveもこれでOK）
-        player.src = `https://www.youtube.com/embed?listType=search&list=${q}&autoplay=1`;
-        
-        // 検索したら自動で「再生中タブ」に飛ばす！
-        switchTab('p');
-    }
+    const q = document.getElementById('query').value;
+    if (!q) return;
+
+    const player = document.getElementById('main-player');
+    
+    // 検索ワードをURL専用の文字に変換（encodeURIComponent）して、埋め込み検索を発動！！
+    player.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&autoplay=1`;
+    
+    // 1ミリの迷いもなく「再生中タブ」へジャンプ！！
+    switchTab('p');
+}
 </script>
 
 </body>
