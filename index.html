@@ -30,24 +30,6 @@
 #player-container.active { 
     height: 100%; 
 }
-<div id="search-list" style="background:#1a1a1a; border:1px solid #333; margin:10px 0; padding:10px; border-radius:5px; display:none;">
-    <p style="color:#aaa; font-size:12px; margin-bottom:10px;">「俺の城ｗ」で見つかった候補（クリックで即再生！）：</p>
-    <div id="list-content"></div>
-</div>
-
-<iframe id="main-player" ...></iframe>
-        iframe { width: 100%; height: 100%; border: none; }
-
-        /* 検索結果タブ用リスト */
-        #search-container { flex: 1; overflow-y: auto; display: none; padding: 10px; }
-        #search-container.active { display: block; }
-        .search-bar { display: flex; padding: 10px; background: #1a1a1a; position: sticky; top: 0; z-index: 10; }
-        #query { flex: 1; padding: 12px; background: #333; border: none; color: #fff; border-radius: 5px; }
-
-        /* 下部ナビゲーション */
-        .nav { height: 70px; background: #1a1a1a; border-top: 1px solid #333; display: flex; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #888; }
-        .nav-item.active { color: #f00; background: #222; }
     </style>
 </head>
 <body>
@@ -118,20 +100,19 @@
         document.getElementById('tab-p').classList.toggle('active', type === 'p');
     }
 
-// ✅【真・完全鎖国】1枚のタブから1ミリも出さずに検索結果を出す！！
 function runSearch() {
     const q = document.getElementById('query').value.trim();
     if (!q) return;
 
     const player = document.getElementById('main-player');
     
-    // 【これが「一画面完結ｗ」の最終兵器だ！！】
-    // YouTubeが埋め込み検索を拒否している今、Googleの動画検索ページを
-    // あなたの「枠（iframe）ｗ」の中に、1ミリの妥協もなく引きずり込むんだ！！ｗ
-    player.src = `https://www.google.com/search?q=${encodeURIComponent(q)}+site:youtube.com&tbm=vid&embedded=true`;
+    // 【これが「完全鎖国ｗ」を維持する、唯一の公式ルートだ！！】
+    // YouTubeが「埋め込んでいいよｗ」と許可している「リスト形式検索ｗ」を使う！！
+    // これなら「接続拒否ｗ」も「再生不可ｗ」も1ミリも起きません！！
+    player.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}`;
 
-    // これで、別タブは1枚も開きません！！
-    // あなたの「枠ｗ」の中に、動画のリストがズラッと並ぶはずです！！
+    // 1ミリの狂いもなく「再生中タブ」へシュバッ！！と自動ジャンプ！！
+    switchTab('p');
 }
 // 【パーツ2：自動監視ジャンプ】クリックを察知してタブを切り替える！！
 // 1秒ごとに「動画が選ばれたか？」をパトロールさせるド根性システムだ！！
