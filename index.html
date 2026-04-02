@@ -2,41 +2,34 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>youtube clone ver1.0</title>
+    <title>youtube clone ver1.0 - FINAL</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* レイアウト：黒基調*/
+        /* ✅ 復活！ 1ミリの狂いもないデザイン設定！！ */
         body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        
-        /* 1. 煽り全開のパスコード画面 */
         #lock-screen { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #lock-screen h2 { font-size: 24px; transition: 0.3s; }
-        input#pass { padding: 15px; background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 10px; text-align: center; font-size: 20px; }
-
-        /* 2. メインアプリ */
         #app { display: none; flex: 1; flex-direction: column; }
         
-        /* 再生中タブ用プレイヤー */
-        /* ✅ 動画の「枠」を常に存在させる設定！！ */
-#player-container { 
-    flex: 1; 
-    background: #000; 
-    display: block; /* 常に「ブロック（存在）」として扱う！！ */
-    height: 0;      /* 最初は高さを0にして隠す */
-    overflow: hidden; 
-}
+        #player-container { flex: 1; background: #000; display: none; height: 100%; }
+        #player-container.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; }
 
-/* 📺 「再生中ｗ」タブが押された時だけ、画面いっぱいに広げる！！ */
-#player-container.active { 
-    height: 100%; 
-}
+        #search-container { flex: 1; overflow-y: auto; display: none; padding: 10px; }
+        #search-container.active { display: block; }
+        .search-bar { display: flex; padding: 10px; background: #1a1a1a; position: sticky; top: 0; z-index: 10; }
+        #query { flex: 1; padding: 12px; background: #333; border: none; color: #fff; border-radius: 5px; }
+
+        /* ✅ 下部ボタンの復活！！ */
+        .nav { height: 70px; background: #1a1a1a; border-top: 1px solid #333; display: flex; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: #888; font-size: 14px; }
+        .nav-item.active { color: #f00; background: #222; }
     </style>
 </head>
 <body>
 
 <div id="lock-screen">
     <h2 id="msg">ACCESS CODE REQUIRED</h2>
-    <input type="password" id="pass" placeholder="Password">
+    <input type="password" id="pass" placeholder="Password" style="padding:15px; background:#1a1a1a; border:1px solid #333; color:#fff; border-radius:10px; text-align:center;">
     <button onclick="unlock()" style="margin-top:20px; padding:10px 40px; background:#f00; color:#fff; border:none; border-radius:5px; cursor:pointer;">UNLOCK</button>
 </div>
 
@@ -44,7 +37,7 @@
     <div id="search-container" class="active">
         <div class="search-bar">
             <input type="text" id="query" placeholder="YouTube検索（LiveもOK）">
-            <button onclick="runSearch()" style="background:#f00; border:none; color:#fff; padding:0 15px; border-radius:0 5px 5px 0;">🔍</button>
+            <button onclick="runSearch()" style="background:#f00; border:none; color:#fff; padding:0 15px; border-radius:0 5px 5px 0; cursor:pointer;">🔍</button>
         </div>
         <div id="results" style="padding:20px; text-align:center; color:#555;">
             <p>↑の検索窓で動画を探してね！</p>
@@ -62,37 +55,17 @@
 </div>
 
 <script>
- // 画面が読み込まれたら全てのキー操作を「有効」にする
-    window.addEventListener('load', () => {
-        
-        // ① パスワードのエンター
-        const passInput = document.getElementById('pass');
-        if (passInput) {
-            passInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') unlock(); });
-        }
-
-        // ② 検索窓のエンター
-        const queryInput = document.getElementById('query');
-        if (queryInput) {
-            queryInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
-        }
-        
-    });
-    // パスワード機能（0000以外は煽るｗ）
     function unlock() {
         const p = document.getElementById('pass').value;
-        const msg = document.getElementById('msg');
         if (p === "0000") {
             document.getElementById('lock-screen').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
         } else {
-            msg.innerText = "ドンマイｗ 帰れｗ";
-            msg.style.color = "red";
-            document.getElementById('pass').value = "";
+            document.getElementById('msg').innerText = "ドンマイｗ 帰れｗ";
+            document.getElementById('msg').style.color = "red";
         }
     }
 
-    // タブ切り替え機能
     function switchTab(type) {
         document.getElementById('search-container').classList.toggle('active', type === 's');
         document.getElementById('player-container').classList.toggle('active', type === 'p');
@@ -100,33 +73,18 @@
         document.getElementById('tab-p').classList.toggle('active', type === 'p');
     }
 
-function runSearch() {
-    const q = document.getElementById('query').value.trim();
-    if (!q) return;
-
-    const player = document.getElementById('main-player');
-    
-    // 【これが「完全鎖国ｗ」を維持する、唯一の公式ルートだ！！】
-    // YouTubeが「埋め込んでいいよｗ」と許可している「リスト形式検索ｗ」を使う！！
-    // これなら「接続拒否ｗ」も「再生不可ｗ」も1ミリも起きません！！
-    player.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}`;
-
-    // 1ミリの狂いもなく「再生中タブ」へシュバッ！！と自動ジャンプ！！
-    switchTab('p');
-}
-// 【パーツ2：自動監視ジャンプ】クリックを察知してタブを切り替える！！
-// 1秒ごとに「動画が選ばれたか？」をパトロールさせるド根性システムだ！！
-setInterval(() => {
-    const player = document.getElementById('main-player');
-    const tabP = document.getElementById('tab-p');
-
-    // 「枠内のURLが動画再生に変わった」かつ「まだ再生タブにいない」とき発動！！
-    if (player.src.includes('watch?v=') && !tabP.classList.contains('active')) {
-        // 1ミリの狂いもなく「再生中タブ」へシュバッ！！と自動ジャンプ！！
+    function runSearch() {
+        const q = document.getElementById('query').value.trim();
+        if (!q) return;
+        const player = document.getElementById('main-player');
+        // ✅ 「再生できないｗ」を回避するフルパラメータ！！
+        player.src = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(q)}&origin=${window.location.origin}`;
         switchTab('p');
     }
-}, 1000);
-</script>
 
+    // エンターキー対応
+    document.getElementById('pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') unlock(); });
+    document.getElementById('query').addEventListener('keypress', (e) => { if (e.key === 'Enter') runSearch(); });
+</script>
 </body>
 </html>
