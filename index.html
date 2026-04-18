@@ -74,20 +74,17 @@
             const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=50&q=${encodeURIComponent(query)}&type=video&key=${API_KEY}`;
             const response = await fetch(url);
             const data = await response.json();
-            displayVideos(data.items);
-            function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('theme-toggle');
+            displayVideos(data.items);            
 }
-        // --- ここからモード切替 ---
+
+// --- 2. モード切替関数 ---
 function toggleTheme() {
     const body = document.body;
     const btn = document.getElementById('theme-toggle');
 
-    if (!body || !btn) return; // 念のための安全策
+    if (!body || !btn) return;
 
     if (body.classList.contains('light-mode')) {
-        // 【闇モード（初期状態）へ】
         body.classList.remove('light-mode');
         body.style.backgroundColor = "#0f0f0f";
         body.style.color = "white";
@@ -95,7 +92,6 @@ function toggleTheme() {
         btn.style.background = "#333";
         btn.style.color = "white";
     } else {
-        // 【光モードへ】
         body.classList.add('light-mode');
         body.style.backgroundColor = "white";
         body.style.color = "#0f0f0f";
