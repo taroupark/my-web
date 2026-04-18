@@ -151,7 +151,7 @@ function showHistory() {
     const history = JSON.parse(localStorage.getItem('ytHistory')) || [];
     
     if (history.length === 0) {
-        alert("履歴が1ミリもありません、ボス！動画を再生してください。");
+        alert("履歴がありません。動画を再生してください。");
         return;
     }
 
