@@ -2,49 +2,96 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>3号機 - SIMPLE ONE BOARD</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite YouTube Clone - Internal Player</title>
     <style>
-        /* 1ミリの妥協もない黒のデザイン*/
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        body { background-color: #0f0f0f; color: white; font-family: Roboto, Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f0f; display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .auth-box { text-align: center; background: #212121; padding: 40px; border-radius: 8px; border: 1px solid #3d3d3d; }
+        #header { width: 100%; padding: 15px; display: flex; justify-content: center; position: sticky; top: 0; background: #0f0f0f; z-index: 100; border-bottom: 1px solid #3d3d3d; }
+        .search-container { display: flex; width: 100%; max-width: 600px; }
+        input { flex: 1; padding: 12px; border-radius: 40px 0 0 40px; border: 1px solid #3d3d3d; background: #121212; color: white; outline: none; font-size: 16px; padding-left: 20px; }
+        button { padding: 10px 25px; border-radius: 0 40px 40px 0; border: 1px solid #3d3d3d; background: #3d3d3d; color: white; cursor: pointer; }
         
-        /* 検索エリア：常に一番上*/
-        .search-bar { padding: 15px; background: #1a1a1a; display: flex; gap: 10px; border-bottom: 1px solid #333; }
-        input#query { flex: 1; padding: 12px; background: #333; border: none; color: #fff; border-radius: 5px; font-size: 16px; }
-        button { background: #f00; border: none; color: #fff; padding: 0 20px; border-radius: 5px; cursor: pointer; }
-
-        /* メインエリア：検索結果も動画もここに全部出す！！ */
-        #main-view { flex: 1; background: #000; }
+        /* メインレイアウト：左に動画再生、右に検索結果 */
+        #main-content { display: flex; flex-direction: column; width: 95%; max-width: 1400px; padding-top: 20px; }
+        #player-container { width: 100%; aspect-ratio: 16 / 9; background: black; border-radius: 12px; overflow: hidden; display: none; margin-bottom: 20px; }
         iframe { width: 100%; height: 100%; border: none; }
+        
+        #video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; width: 100%; }
+        .video-card { cursor: pointer; }
+        .video-card img { width: 100%; border-radius: 12px; transition: 0.2s; }
+        .video-card:hover img { border-radius: 0; }
+        .video-title { font-weight: bold; font-size: 14px; margin-top: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .video-meta { font-size: 12px; color: #aaaaaa; margin-top: 4px; }
     </style>
 </head>
 <body>
 
-    <div class="search-bar">
-        <input type="text" id="query" placeholder="YouTube検索ワードを入れてEnter" 
-               onkeydown="if(event.key==='Enter'){runSearch(); return false;}">
-        <button onclick="runSearch()">🔍</button>
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <h2>🔒 アクセス認証</h2>
+            <input type="password" id="pass-input" placeholder="Password" onkeydown="if(event.key==='Enter') checkPass()">
+            <button onclick="checkPass()">Unlock</button>
+        </div>
     </div>
 
-    <div id="main-view">
-        <iframe id="player" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <div id="header">
+        <div class="search-container">
+            <input type="text" id="search-query" placeholder="検索" onkeydown="if(event.key==='Enter') searchVideos()">
+            <button onclick="searchVideos()">検索</button>
+        </div>
     </div>
 
-<script>
-    function runSearch() {
-        const q = document.getElementById('query').value.trim();
-        if (!q) return;
-
-        const player = document.getElementById('player');
+    <div id="main-content">
+        <div id="player-container">
+            <iframe id="main-player" src="" allowfullscreen></iframe>
+        </div>
         
-        //  【これが真の解決策だ！！】
-        // embed（埋め込み専用）ではなく、YouTubeの「検索結果（results）」ページを直接呼ぶ！！
-        player.src = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
-    }
+        <div id="video-grid"></div>
+    </div>
 
-    // 起動時に軽くフォーカスを合わせる
-    window.onload = () => { document.getElementById('query').focus(); };
-</script>
+    <script>
+        const API_KEY = AIzaSyC5Z2XbmZYkYqxAcWl1W9PLEx6bD6B0Wyw;
 
+        function checkPass() {
+            if (document.getElementById('pass-input').value === '1213') {
+                document.getElementById('auth-overlay').style.display = 'none';
+            }
+        }
+
+        async function searchVideos() {
+            const query = document.getElementById('search-query').value;
+            if (!query) return;
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=12&q=${encodeURIComponent(query)}&type=video&key=${API_KEY}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            displayVideos(data.items);
+        }
+
+        function displayVideos(videos) {
+            const grid = document.getElementById('video-grid');
+            grid.innerHTML = '';
+            videos.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'video-card';
+                card.onclick = () => playVideo(video.id.videoId);
+                card.innerHTML = `
+                    <img src="${video.snippet.thumbnails.medium.url}">
+                    <div class="video-title">${video.snippet.title}</div>
+                    <div class="video-meta">${video.snippet.channelTitle}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function playVideo(videoId) {
+            const container = document.getElementById('player-container');
+            const player = document.getElementById('main-player');
+            player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            container.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
