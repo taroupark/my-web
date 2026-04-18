@@ -33,7 +33,7 @@
 </button>
     <div id="auth-overlay">
         <div class="auth-box">
-            <h2>🔒 アクセス認証</h2>
+            <h2>アクセス認証</h2>
             <input type="password" id="pass-input" placeholder="Password" onkeydown="if(event.key==='Enter') checkPass()">
             <button onclick="checkPass()">Unlock</button>
         </div>
@@ -43,6 +43,7 @@
         <div class="search-container">
             <input type="text" id="search-query" placeholder="検索" onkeydown="if(event.key==='Enter') searchVideos()">
             <button onclick="searchVideos()">検索</button>
+            <button class="history-btn" onclick="showHistory()">履歴</button>
         </div>
     </div>
 
@@ -106,7 +107,12 @@ function toggleTheme() {
             videos.forEach(video => {
                 const card = document.createElement('div');
                 card.className = 'video-card';
-                card.onclick = () => playVideo(video.id.videoId);
+                card.onclick = () => {
+    // 1. まず履歴に刻む
+    saveToHistory(video.snippet.title, video.id.videoId); 
+    // 2. その後に再生する！
+    playVideo(video.id.videoId);
+};
                 card.innerHTML = `
                     <img src="${video.snippet.thumbnails.medium.url}">
                     <div class="video-title">${video.snippet.title}</div>
@@ -123,6 +129,46 @@ function toggleTheme() {
             container.style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+        // --- 履歴保存エンジン ---
+function saveToHistory(title, videoId) {
+    // 1. ブラウザの「隠し引き出し（localStorage）」から今の履歴を出す
+    let history = JSON.parse(localStorage.getItem('ytHistory')) || [];
+    
+    // 2. 「重複」を消して、最新を一番上にする
+    history = history.filter(item => item.id !== videoId);
+    history.unshift({ title: title, id: videoId });
+    
+    // 3. 10件溜まったら古いものから消す
+    if (history.length > 10) history.pop();
+    
+    // 4. 引き出しに戻す！
+    localStorage.setItem('ytHistory', JSON.stringify(history));
+    
+    console.log("履歴に保存:", title);
+}
+function showHistory() {
+    // 1. 保存された履歴を取得（なければ空っぽ）
+    const history = JSON.parse(localStorage.getItem('ytHistory')) || [];
+    
+    if (history.length === 0) {
+        alert("履歴が1ミリもありません、ボス！動画を再生してください。");
+        return;
+    }
+
+    // 2. 履歴データをYouTubeの検索結果と同じ「形」に変換する
+    // ぶっちゃけ、こうすることで既存の表示機能を100%使い回せるんですよね
+    const historyData = history.map(item => ({
+        id: { videoId: item.id },
+        snippet: { 
+            title: item.title,
+            thumbnails: { medium: { url: `https://img.youtube.com/vi/${item.id}/mqdefault.jpg` } },
+            channelTitle: "閲覧済み"
+        }
+    }));
+
+    // 3.「displayVideos」を呼び出して表示！
+    displayVideos(historyData);
+}
     </script>
 </body>
 </html>
